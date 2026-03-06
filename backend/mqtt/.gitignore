@@ -1,0 +1,16 @@
+# Compilados
+/target
+
+# Variables de entorno
+.env
+.env.*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

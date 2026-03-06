@@ -1,4 +1,5 @@
 # Generic
+
 ## Architecture
 - Definir una vision global de la arquitectura del proyecto
 
@@ -6,7 +7,10 @@
 
 
 # Frontend
+
 ## App
+- Tener en cuenta la siguiente documentación para rendimiento: https://reactnativecoders.com/trending/how-to-install-and-setup-react-native-on-mac/
+
 ### Architecture
 
 
@@ -15,6 +19,7 @@
 
 
 # Backend
+
 ## Architecture
 
 

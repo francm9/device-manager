@@ -13,7 +13,7 @@ impl ConnectService {
         Self { connection_service }
     }
 
-    pub fn connect(&self) -> Result<Arc<dyn MqttClient>, MqttError> {
-        self.connection_service.connect()
+    pub async fn connect(&self) -> Result<Arc<dyn MqttClient>, MqttError> {
+        self.connection_service.connect().await
     }
 }

@@ -1,19 +1,36 @@
+use rumqttc::{AsyncClient, MqttOptions};
 use std::sync::Arc;
+use std::time::Duration;
+use tracing::{error, info};
 
-use self::application::connect_service::ConnectService;
-use self::domain::connect_service_trait::ConnectServiceTrait;
-use self::infrastructure::rumqttc_connection_service::RumqttcConnectionService;
+use self::domain::mqtt_client::MqttClient;
+use self::infrastructure::generic_mqtt_event_handler::GenericMqttEventHandler;
+use self::infrastructure::rumqttc_client::RumqttcClient;
+use self::infrastructure::rumqttc_event_loop::RumqttcEventLoop;
 
 pub mod application;
 pub mod domain;
 pub mod infrastructure;
 
-fn main() {
-    println!("Welcome to the MQTT Service!");
+#[tokio::main]
+async fn main() {
+    tracing_subscriber::fmt::init();
+    info!("MQTT Service loading...");
 
-    let rumqttc_connection_service: Arc<dyn ConnectServiceTrait> =
-        Arc::new(RumqttcConnectionService::new("prueba", "localhost", 1883));
-    let connection_service = ConnectService::new(rumqttc_connection_service);
+    let mut options = MqttOptions::new("prueba", "localhost", 1883);
+    options.set_keep_alive(Duration::from_secs(30));
 
-    let connect_result = connection_service.connect();
+    let (async_client, event_loop) = AsyncClient::new(options, 10);
+
+    let handler = Arc::new(GenericMqttEventHandler::new());
+    let client: Arc<dyn MqttClient> = Arc::new(RumqttcClient::new(async_client));
+
+    let event_loop_handle = tokio::spawn(RumqttcEventLoop::new(event_loop, handler).run());
+
+    let _ = client.subscribe("sensors").await;
+    let _ = client.publish("status", "online").await;
+
+    if let Err(e) = event_loop_handle.await {
+        error!("Event loop panicked: {e}");
+    }
 }

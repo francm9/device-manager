@@ -1,26 +1,34 @@
-use crate::domain::mqtt_event_handler::MqttEventHandler;
-use async_trait::async_trait;
+use std::sync::Arc;
+
+use crate::domain::{
+    box_future::BoxFuture, i_message_repository::IMessageRepository,
+    mqtt_event_handler::MqttEventHandler,
+};
 use tracing::{self, info};
 
-pub struct GenericMqttEventHandler {}
+pub struct GenericMqttEventHandler {
+    message_repository: Arc<dyn IMessageRepository>,
+}
 
 impl GenericMqttEventHandler {
-    pub fn new() -> Self {
-        Self {}
+    pub fn new(message_repository: Arc<dyn IMessageRepository>) -> Self {
+        Self { message_repository }
     }
 }
 
-#[async_trait]
 impl MqttEventHandler for GenericMqttEventHandler {
-    async fn on_message(&self, topic: &str, _payload: &[u8]) {
-        info!("New message has been published in topic {topic}!");
+    fn on_message<'a>(&'a self, topic: &'a str, payload: &'a [u8]) -> BoxFuture<'a, ()> {
+        Box::pin(async move {
+            info!("New message has been published in topic {topic}!");
+            self.message_repository.add(topic, payload.to_vec()).await;
+        })
     }
 
-    async fn on_connect(&self) {
+    fn on_connect(&self) {
         info!("Client established connection with the broker!");
     }
 
-    async fn on_disconnect(&self) {
+    fn on_disconnect(&self) {
         info!("Client has been disconnected from the broker!");
     }
 }

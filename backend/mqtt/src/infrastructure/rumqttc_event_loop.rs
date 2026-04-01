@@ -25,11 +25,11 @@ impl RumqttcEventLoop {
                 }
                 Ok(Event::Incoming(Packet::ConnAck(ack))) => {
                     info!("Connected to broker, code: {:?}", ack.code);
-                    self.handler.on_connect().await;
+                    self.handler.on_connect();
                 }
                 Ok(Event::Incoming(Packet::Disconnect)) => {
                     info!("Broker sent disconnect");
-                    self.handler.on_disconnect().await;
+                    self.handler.on_disconnect();
                     break;
                 }
                 Ok(Event::Incoming(Packet::SubAck(ack))) => {

@@ -1,9 +1,12 @@
 use super::mqtt_error::MqttError;
-use async_trait::async_trait;
+use crate::domain::box_future::BoxFuture;
 
-#[async_trait]
 pub trait MqttClient: Send + Sync {
-    async fn publish(&self, topic: &str, message: &str) -> Result<(), MqttError>;
-    async fn subscribe(&self, topic: &str) -> Result<(), MqttError>;
-    async fn disconnect(&self) -> Result<(), MqttError>;
+    fn publish<'a>(
+        &'a self,
+        topic: &'a str,
+        message: &'a str,
+    ) -> BoxFuture<'a, Result<(), MqttError>>;
+    fn subscribe<'a>(&'a self, topic: &'a str) -> BoxFuture<'a, Result<(), MqttError>>;
+    fn disconnect(&self) -> BoxFuture<'_, Result<(), MqttError>>;
 }

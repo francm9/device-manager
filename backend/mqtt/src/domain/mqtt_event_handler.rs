@@ -1,8 +1,7 @@
-use async_trait::async_trait;
+use crate::domain::box_future::BoxFuture;
 
-#[async_trait]
 pub trait MqttEventHandler: Send + Sync {
-    async fn on_message(&self, topic: &str, payload: &[u8]);
-    async fn on_connect(&self);
-    async fn on_disconnect(&self);
+    fn on_message<'a>(&'a self, topic: &'a str, payload: &'a [u8]) -> BoxFuture<'a, ()>;
+    fn on_connect(&self);
+    fn on_disconnect(&self);
 }
